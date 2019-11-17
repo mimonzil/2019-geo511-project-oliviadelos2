@@ -79,7 +79,7 @@ c2017_spread <- spread(crime2017, parent_incident_type, total)
 
 c2017_spread[is.na(c2017_spread)] <- 0
 
-# Clean race data - WHY NOT ALL IN SAME COLUMN
+# Clean race data
 
 #race_clean <- race2017 %>%
 #  group_by(NAME, estimate)
