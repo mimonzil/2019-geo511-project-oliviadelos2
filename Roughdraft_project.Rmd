@@ -1,0 +1,126 @@
+
+---
+title: "Residential Segregation and Crime Variation"
+author: Olivia Delos
+---
+
+# Introduction
+A large body of literature finds those living in racially segregated areas face higher disadvantage. Racially segregated areas are typically high poverty, with few employment opportunities, higher crime rates, and few social resources to foster upward mobilitiy, all factors that perpetuate crime (Logan and Oakley 2017). Policing is a common form of social control used in disadvantaged, racially segregated neighborhoods which lack the resources to form their own social control (Logan and Oakley 2017). Minorities are also arrested and convicted of crimes at higher rates due to unfair treatment at all stages of judicial processing. Studies find that violent crime is particularly common in disadvantaged neighborhoods (Friedson and Sharkey 2015). Taking this all into consideration, I predict that neighborhoods with higher levels of segregation will also have higher crime rates and the difference in crime between high and low segregated areas will be larger for violent crimes than property crimes, such as theft. I will measure segregation by calculating the dissimilarity index for census tracts in Buffalo, NY to determine if the number of crimes committed vary depending on residential segregation levels for both Black-white segregation and Hispanic-white segregation. To determine if rates differ depending on the crime type being examined, I will look at six crime types using PenData Buffalo: assault, breaking and entering, homicide, sexual offenses, robbery, and theft.
+
+
+# Materials and methods
+
+1. Load required packages
+2. Download crime data from buffalony.gov and 2017 ACS estimates for race data in Erie County
+3. Clean and join data
+4. Calculate segregation measures
+4. Run regression on types of crime and segregation
+5. Create figures
+
+## 1. Load required packages.
+```{r, message=F, warning=F}
+library(tidycensus)
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(seg)
+library(sf)
+library(tigris)
+```
+
+## 2. Download the data
+
+```{r, results="hide"}
+#Load crime data
+crimesf=read_sf("https://data.buffalony.gov/api/geospatial/d6g9-xbgu?method=export&format=GeoJSON")
+
+
+#Load census data
+v17 <- load_variables(year = 2017, dataset = "acs5", cache = TRUE)
+
+racevars <- c(White = "B03002_003",
+              Black = "B03002_004",
+              Hispanic = "B03002_012")
+
+race2017 <- get_acs(geography = "tract",
+                        variables = racevars,
+                       state = "NY",
+                       county = "Erie",
+                       geometry = TRUE)
+
+
+#Transform crime geometry to match census tract
+
+crimetrans <- st_transform(crimesf, st_crs(race2017))
+
+race_tracts <- st_join(crimetrans, select(race2017,NAME), st_intersects)
+
+```
+
+## 3. Clean and join data
+```{r}
+#extract year from date
+crime_date <- ymd_hms(race_tracts$incident_datetime) %>%
+    year()
+  
+crime_year <- cbind(crime_date, race_tracts, stringsAsFactors = FALSE)
+
+#clean/filter crime data, drop geometry
+crime2017 <- crime_year %>%
+     filter(crime_date >= 2013 & crime_date <= 2017) %>%
+     group_by(NAME, parent_incident_type, crime_date) %>%
+    summarize(total = n()) %>%
+    st_set_geometry(NULL)
+
+
+c2017_spread <- spread(crime2017, parent_incident_type, total)
+
+c2017_spread[is.na(c2017_spread)] <- 0
+
+# Clean race data - WHY NOT ALL IN SAME COLUMN
+
+#race_clean <- race2017 %>%
+#  group_by(NAME, estimate)
+#  spread(variable, NAME)
+  
+
+```
+
+## 4. Calculate dissimilarity index
+```{r, results='asis'}
+```
+
+
+# Results
+
+This figure is a map of median income estimates by census tracts in Erie County, NY. 
+
+```{r, fig.width=6, fig.height=3, fig.cap="Map of median income by census tract"}
+race2017 %>% 
+  ggplot(aes(fill = variable)) +
+  geom_sf()
+
+```
+
+This figure is a map of crime by type in 2017
+
+```{r}
+
+ggplot(crime2017, aes(x = crime_date , y = total)) + geom_line(aes(color = parent_incident_type))
+
+```
+```{r}
+# ggplot(crime2017, aes(color = total)) + geom_sf()
+```
+# Conclusions
+
+
+
+# References
+
+Friedson, Michael and Patrick Sharkey. 2015. "Violence and Neighborhood Disadvantage after the Crime Decline." *The American Academy of Political & Social Science* 660. 
+
+Logan, John, and Deirdre Oakley. 2017. “Black Lives and Policing: The Larger Context of
+Ghettoization.” *Journal of Urban Affairs* 39:1031-1046.
