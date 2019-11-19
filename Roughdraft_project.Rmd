@@ -70,7 +70,7 @@ crime_year <- cbind(crime_date, race_tracts, stringsAsFactors = FALSE)
 #clean/filter crime data, drop geometry
 crime2017 <- crime_year %>%
      filter(crime_date >= 2013 & crime_date <= 2017) %>%
-     group_by(NAME, parent_incident_type, crime_date) %>%
+     group_by(NAME, parent_incident_type) %>%
     summarize(total = n()) %>%
     st_set_geometry(NULL)
 
@@ -81,15 +81,37 @@ c2017_spread[is.na(c2017_spread)] <- 0
 
 # Clean race data
 
-#race_clean <- race2017 %>%
-#  group_by(NAME, estimate)
-#  spread(variable, NAME)
+race_clean <- race2017 %>%
+  select(-moe) %>%
+  group_by(estimate, variable) %>%
+  spread(variable, estimate)
+  
+crime_race <- left_join(race_clean, c2017_spread, by = c("NAME" = "NAME"))
   
 
 ```
 
 ## 4. Calculate dissimilarity index
 ```{r, results='asis'}
+#Select only columns I need
+
+blackwhite <- crime_race %>%
+  select(Black, White)
+
+hispwhite <- crime_race %>%
+    select(Hispanic, White)
+
+#Convert to spatial polygons data frame
+sp_blackwhite <- as_Spatial(st_geometry(blackwhite))
+
+sp_hispwhite <- as_Spatial((st_geometry(hispwhite)))
+
+#Calculate dissimilarity index
+
+blackwhite_seg <- dissim(data = sp_blackwhite)
+
+sf_blackwhtie <- st_as_sf(sp_blackwhite)
+
 ```
 
 
