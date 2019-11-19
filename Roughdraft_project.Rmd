@@ -40,7 +40,8 @@ crimesf=read_sf("https://data.buffalony.gov/api/geospatial/d6g9-xbgu?method=expo
 #Load census data
 v17 <- load_variables(year = 2017, dataset = "acs5", cache = TRUE)
 
-racevars <- c(White = "B03002_003",
+racevars <- c(Total = "B03001_001",
+              White = "B03002_003",
               Black = "B03002_004",
               Hispanic = "B03002_012")
 
@@ -108,9 +109,12 @@ sp_hispwhite <- as_Spatial((st_geometry(hispwhite)))
 
 #Calculate dissimilarity index
 
-blackwhite_seg <- dissim(data = sp_blackwhite)
+# matrix_crime_race <- data.matrix(crime_race, rownames.force = NA)
 
-sf_blackwhtie <- st_as_sf(sp_blackwhite)
+blackwhite_seg <- spseg(sp_blackwhite, crime_race)
+  
+  dissim(data = sp_blackwhite)
+
 
 ```
 
