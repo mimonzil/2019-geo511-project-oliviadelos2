@@ -48,23 +48,21 @@ med_income2017 <- get_acs(geography = "tract",
                        geometry = TRUE)
 
 
+# Load 2009 census data
+v09 <- load_variables(year = 2010, dataset = "acs5", cache = TRUE)
+
+med_income2010 <- get_acs(geography = "tract",
+                        variables = "B19013_001",
+                       state = "NY",
+                       county = "Erie",
+                       year = 2010,
+                       geometry = TRUE)
+
 #Transform crime geometry to match census tract
 
 crimetrans <- st_transform(crimesf, st_crs(med_income2017))
 
 inc_tracts <- st_join(crimetrans, select(med_income2017,NAME), st_intersects)
-
-# Load 2010 census data
-v09 <- load_variables(year = 2009, dataset = "acs5", cache = TRUE)
-
-# This is not working 
-#med_income2009 <- get_acs(geography = "tract",
-#                        variables = "B06011_001",
-#                       state = "NY",
-#                       county = "Erie",
-#                       year = 2009,
-#                       geometry = TRUE,
-#                       cb = FALSE)
 
 ```
 
@@ -87,6 +85,18 @@ crime2017 <- crime_year %>%
 c2017_spread <- spread(crime2017, parent_incident_type, total)
 
 c2017_spread[is.na(c2017_spread)] <- 0
+
+#Do the same for 2010
+crime2010 <- crime_year %>%
+     filter(crime_date >= 2006 & crime_date <= 2010) %>%
+     group_by(NAME, crime_date, parent_incident_type) %>%
+    summarize(total = n()) %>%
+    st_set_geometry(NULL)
+
+c2010_spread <- spread(crime2010, parent_incident_type, total)
+
+c2010_spread[is.na(c2010_spread)] <- 0
+
 ```
 
 # Clean race data and join datasets
