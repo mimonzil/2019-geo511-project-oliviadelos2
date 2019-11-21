@@ -37,13 +37,14 @@ library(tigris)
 crimesf=read_sf("https://data.buffalony.gov/api/geospatial/d6g9-xbgu?method=export&format=GeoJSON")
 
 
-#Load census data
+#Load 2017 census data
 v17 <- load_variables(year = 2017, dataset = "acs5", cache = TRUE)
 
 med_income2017 <- get_acs(geography = "tract",
                         variables = "B06011_001",
                        state = "NY",
                        county = "Erie",
+                       year = 2017,
                        geometry = TRUE)
 
 
@@ -52,6 +53,18 @@ med_income2017 <- get_acs(geography = "tract",
 crimetrans <- st_transform(crimesf, st_crs(med_income2017))
 
 inc_tracts <- st_join(crimetrans, select(med_income2017,NAME), st_intersects)
+
+# Load 2010 census data
+v09 <- load_variables(year = 2009, dataset = "acs5", cache = TRUE)
+
+# This is not working 
+#med_income2009 <- get_acs(geography = "tract",
+#                        variables = "B06011_001",
+#                       state = "NY",
+#                       county = "Erie",
+#                       year = 2009,
+#                       geometry = TRUE,
+#                       cb = FALSE)
 
 ```
 
