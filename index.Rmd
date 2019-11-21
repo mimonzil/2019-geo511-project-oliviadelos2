@@ -1,91 +1,124 @@
 
 ---
-title: "Neighborhood Segregation and Crime Variation"
+title: "Income and Crime Variation Over Time"
 author: Olivia Delos
-subtitle: Subtitle here if desired
 ---
 
 # Introduction
-My really awesome and complete introduction will go here.  
+A large body of literature finds those living in racially segregated areas face higher disadvantage. Racially segregated areas are typically high poverty, with few employment opportunities, higher crime rates, and few social resources to foster upward mobilitiy, all factors that perpetuate crime (Logan and Oakley 2017). Policing is a common form of social control used in disadvantaged, racially segregated neighborhoods which lack the resources to form their own social control (Logan and Oakley 2017). Minorities are also arrested and convicted of crimes at higher rates due to unfair treatment at all stages of judicial processing. Studies find that violent crime is particularly common in disadvantaged neighborhoods (Friedson and Sharkey 2015). Taking this all into consideration, I predict that neighborhoods with higher levels of segregation will also have higher crime rates and the difference in crime between high and low segregated areas will be larger for violent crimes than property crimes, such as theft. I will measure segregation by calculating the dissimilarity index for census tracts in Buffalo, NY to determine if the number of crimes committed vary depending on residential segregation levels for both Black-white segregation and Hispanic-white segregation. To determine if rates differ depending on the crime type being examined, I will look at six crime types using PenData Buffalo: assault, breaking and entering, homicide, sexual offenses, robbery, and theft.
+
 
 # Materials and methods
 
-Narrative and most code will go here.  Describe what you are doing and show how to do it (with code).
+1. Load required packages
+2. Download crime data from buffalony.gov and 2017 ACS estimates for race data in Erie County
+3. Clean and join data
+4. Calculate segregation measures
+4. Run regression on types of crime and segregation
+5. Create figures
 
-You can do bullets like this:
-
-* The first most important thing
-* The second most important thing
-* The third most important thing
-
-You can do numbers like this:
-
-1. The first most important thing
-2. The second most important thing
-3. The third most important thing
-
-See [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/) for all the amazing things you can do.
-
-
-Here's my first code chunk.
-```{r}
-1+2
-```
-
-Load any required packages in a code chunk (you may need to install some packages):
-
+## 1. Load required packages.
 ```{r, message=F, warning=F}
+library(tidycensus)
 library(tidyverse)
-library(leaflet)
-library(kableExtra)
-library(rmarkdown)
-library(knitr)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(seg)
+library(sf)
+library(tigris)
 ```
 
-## Download and clean all required data
-```{r}
-n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))
+## 2. Download the data
+
+```{r, results="hide", cache = TRUE}
+#Load crime data
+crimesf=read_sf("https://data.buffalony.gov/api/geospatial/d6g9-xbgu?method=export&format=GeoJSON")
+
+
+#Load census data
+v17 <- load_variables(year = 2017, dataset = "acs5", cache = TRUE)
+
+med_income2017 <- get_acs(geography = "tract",
+                        variables = "B06011_001",
+                       state = "NY",
+                       county = "Erie",
+                       geometry = TRUE)
+
+
+#Transform crime geometry to match census tract
+
+crimetrans <- st_transform(crimesf, st_crs(med_income2017))
+
+inc_tracts <- st_join(crimetrans, select(med_income2017,NAME), st_intersects)
+
 ```
 
-```{r, results='asis'}
-data %>% 
-  slice(1:10) %>% #show only 1:n rows
-  kable(digits=2,align="c")%>% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c("striped", "hover", "condensed", "responsive")) #apply other formatting
+## 3. Clean crime data
+```{r, cache = TRUE}
+#extract year from date
+crime_date <- ymd_hms(inc_tracts$incident_datetime) %>%
+    year()
+  
+crime_year <- cbind(crime_date, inc_tracts, stringsAsFactors = FALSE)
+
+#clean/filter crime data, drop geometry
+crime2017 <- crime_year %>%
+     filter(crime_date >= 2013 & crime_date <= 2017) %>%
+     group_by(NAME, parent_incident_type) %>%
+    summarize(total = n()) %>%
+    st_set_geometry(NULL)
+
+
+c2017_spread <- spread(crime2017, parent_incident_type, total)
+
+c2017_spread[is.na(c2017_spread)] <- 0
 ```
 
-Add any additional processing steps here.
+# Clean race data and join datasets
+```{r, cache = TRUE}
+income_clean <- med_income2017 %>%
+  select(-moe, -variable)
+  
+crime_race <- left_join(income_clean, c2017_spread, by = c("NAME" = "NAME"))
+  
+```
+
+
+## 4. Run regression
+```{r, results='asis', cache = TRUE}
+
+
+```
+
+
 
 # Results
 
-Show tables, plots, etc. and describe them.
+This figure is a map of median income estimates by census tracts in Erie County, NY. 
 
-```{r, fig.width=6, fig.height=3, fig.cap="Map of completely random data"}
-m <- leaflet(data) %>% 
-  addTiles() %>% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %>% 
-  addPopups(~x[2], ~y[2], "Random popup")
-m  # a map with the default OSM tile layer
+```{r, fig.width=6, fig.height=3, fig.cap="Map of median income by census tract"}
+income_clean %>% 
+  ggplot(aes(fill = estimate)) +
+  geom_sf()
+
 ```
 
+This figure is a map of crime by type in 2017
 
 ```{r}
-data %>% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()
-```
+# ggplot(crime2017, aes(x = crime_date, y = total)) + geom_line(aes(color = parent_incident_type))
 
+# ggplot(crime2017, aes(color = total)) + geom_sf()
+```
 # Conclusions
 
-What have you learned?  Are there any broader implications?
+
 
 # References
+
+Friedson, Michael and Patrick Sharkey. 2015. "Violence and Neighborhood Disadvantage after the Crime Decline." *The American Academy of Political & Social Science* 660. 
+
+Logan, John, and Deirdre Oakley. 2017. “Black Lives and Policing: The Larger Context of
+Ghettoization.” *Journal of Urban Affairs* 39:1031-1046.
