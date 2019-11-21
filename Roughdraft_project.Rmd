@@ -60,7 +60,7 @@ race_tracts <- st_join(crimetrans, select(race2017,NAME), st_intersects)
 
 ```
 
-## 3. Clean and join data
+## 3. Clean crime data
 ```{r}
 #extract year from date
 crime_date <- ymd_hms(race_tracts$incident_datetime) %>%
@@ -79,21 +79,30 @@ crime2017 <- crime_year %>%
 c2017_spread <- spread(crime2017, parent_incident_type, total)
 
 c2017_spread[is.na(c2017_spread)] <- 0
+```
 
-# Clean race data
-
+# Clean race data and join datasets
+```{r}
 race_clean <- race2017 %>%
   select(-moe) %>%
   group_by(estimate, variable) %>%
   spread(variable, estimate)
   
+  
 crime_race <- left_join(race_clean, c2017_spread, by = c("NAME" = "NAME"))
   
-
 ```
+
 
 ## 4. Calculate dissimilarity index
 ```{r, results='asis'}
+#Calculate county-level measures (row)
+# co_totals <- rowSums(race_clean)
+
+#co_black <- sum(race_clean$Black)
+#co_hisp <- sum(race_clean$Hispanic)
+#co_white <- sum(race_clean$White)
+
 #Select only columns I need
 
 blackwhite <- crime_race %>%

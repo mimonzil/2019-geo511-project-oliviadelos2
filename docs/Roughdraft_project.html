@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Olivia Delos" />
+
+
+<title>Residential Segregation and Crime Variation</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">R Data Science Final Project</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Residential Segregation and Crime Variation</h1>
+<h4 class="author">Olivia Delos</h4>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>A large body of literature finds those living in racially segregated areas face higher disadvantage. Racially segregated areas are typically high poverty, with few employment opportunities, higher crime rates, and few social resources to foster upward mobilitiy, all factors that perpetuate crime (Logan and Oakley 2017). Policing is a common form of social control used in disadvantaged, racially segregated neighborhoods which lack the resources to form their own social control (Logan and Oakley 2017). Minorities are also arrested and convicted of crimes at higher rates due to unfair treatment at all stages of judicial processing. Studies find that violent crime is particularly common in disadvantaged neighborhoods (Friedson and Sharkey 2015). Taking this all into consideration, I predict that neighborhoods with higher levels of segregation will also have higher crime rates and the difference in crime between high and low segregated areas will be larger for violent crimes than property crimes, such as theft. I will measure segregation by calculating the dissimilarity index for census tracts in Buffalo, NY to determine if the number of crimes committed vary depending on residential segregation levels for both Black-white segregation and Hispanic-white segregation. To determine if rates differ depending on the crime type being examined, I will look at six crime types using PenData Buffalo: assault, breaking and entering, homicide, sexual offenses, robbery, and theft.</p>
+</div>
+<div id="materials-and-methods" class="section level1">
+<h1>Materials and methods</h1>
+<ol style="list-style-type: decimal">
+<li>Load required packages</li>
+<li>Download crime data from buffalony.gov and 2017 ACS estimates for race data in Erie County</li>
+<li>Clean and join data</li>
+<li>Calculate segregation measures</li>
+<li>Run regression on types of crime and segregation</li>
+<li>Create figures</li>
+</ol>
+<div id="load-required-packages." class="section level2">
+<h2>1. Load required packages.</h2>
+<pre class="r"><code>library(tidycensus)
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(seg)
+library(sf)
+library(tigris)</code></pre>
+</div>
+<div id="download-the-data" class="section level2">
+<h2>2. Download the data</h2>
+<pre class="r"><code>#Load crime data
+crimesf=read_sf(&quot;https://data.buffalony.gov/api/geospatial/d6g9-xbgu?method=export&amp;format=GeoJSON&quot;)
+
+
+#Load census data
+v17 &lt;- load_variables(year = 2017, dataset = &quot;acs5&quot;, cache = TRUE)
+
+racevars &lt;- c(White = &quot;B03002_003&quot;,
+              Black = &quot;B03002_004&quot;,
+              Hispanic = &quot;B03002_012&quot;)
+
+race2017 &lt;- get_acs(geography = &quot;tract&quot;,
+                        variables = racevars,
+                       state = &quot;NY&quot;,
+                       county = &quot;Erie&quot;,
+                       geometry = TRUE)</code></pre>
+<pre><code>## Getting data from the 2013-2017 5-year ACS</code></pre>
+<pre><code>## Downloading feature geometry from the Census website.  To cache shapefiles for use in future sessions, set `options(tigris_use_cache = TRUE)`.</code></pre>
+<pre class="r"><code>#Transform crime geometry to match census tract
+
+crimetrans &lt;- st_transform(crimesf, st_crs(race2017))
+
+race_tracts &lt;- st_join(crimetrans, select(race2017,NAME), st_intersects)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersects assumes that they are planar</code></pre>
+</div>
+<div id="clean-and-join-data" class="section level2">
+<h2>3. Clean and join data</h2>
+<pre class="r"><code>#extract year from date
+crime_date &lt;- ymd_hms(race_tracts$incident_datetime) %&gt;%
+    year()
+  
+crime_year &lt;- cbind(crime_date, race_tracts, stringsAsFactors = FALSE)
+
+#clean/filter crime data, drop geometry
+crime2017 &lt;- crime_year %&gt;%
+     filter(crime_date &gt;= 2013 &amp; crime_date &lt;= 2017) %&gt;%
+     group_by(NAME, parent_incident_type, crime_date) %&gt;%
+    summarize(total = n()) %&gt;%
+    st_set_geometry(NULL)
+
+
+c2017_spread &lt;- spread(crime2017, parent_incident_type, total)
+
+c2017_spread[is.na(c2017_spread)] &lt;- 0
+
+# Clean race data
+
+#race_clean &lt;- race2017 %&gt;%
+#  group_by(NAME, estimate)
+#  spread(variable, NAME)</code></pre>
+</div>
+<div id="calculate-dissimilarity-index" class="section level2">
+<h2>4. Calculate dissimilarity index</h2>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<p>This figure is a map of median income estimates by census tracts in Erie County, NY.</p>
+<pre class="r"><code>race2017 %&gt;% 
+  ggplot(aes(fill = variable)) +
+  geom_sf()</code></pre>
+<div class="figure">
+<img src="Roughdraft_project_files/figure-html/unnamed-chunk-5-1.png" alt="Map of median income by census tract" width="576" />
+<p class="caption">
+Map of median income by census tract
+</p>
+</div>
+<p>This figure is a map of crime by type in 2017</p>
+<pre class="r"><code>ggplot(crime2017, aes(x = crime_date , y = total)) + geom_line(aes(color = parent_incident_type))</code></pre>
+<p><img src="Roughdraft_project_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code># ggplot(crime2017, aes(color = total)) + geom_sf()</code></pre>
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>Friedson, Michael and Patrick Sharkey. 2015. “Violence and Neighborhood Disadvantage after the Crime Decline.” <em>The American Academy of Political &amp; Social Science</em> 660.</p>
+<p>Logan, John, and Deirdre Oakley. 2017. “Black Lives and Policing: The Larger Context of Ghettoization.” <em>Journal of Urban Affairs</em> 39:1031-1046.</p>
+</div>
+
+<!-- give the footer some space -->
+<br/>
+<br/>
+
+<footer id="site-footer">
+  <div id="footer1">
+  This website is a project for Adam Wilson's <a href="https://wilsonlab.io/GEO511"><i> Spatial Data Science (GEO511) </i></a>Course at the University at Buffalo
+  </div>
+  <div id="footer2">
+  <a rel="license" property="http://creativecommons.org/ns#license"
+  href="http://creativecommons.org/licenses/by/4.0/" ><img src="img/cc-by.svg" alt="cc-by"/></a> 
+  </div>
+</footer>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+
+</body>
+</html>
