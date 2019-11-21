@@ -13,9 +13,9 @@
 <meta name="author" content="Olivia Delos" />
 
 
-<title>Neighborhood Segregation and Crime Variation</title>
+<title>Residential Segregation and Crime Variation</title>
 
-<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -27,15 +27,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
-<script src="site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
-<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
-<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
-<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
-<script src="site_libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script>
-<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
-<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
-<script src="site_libs/leaflet-binding-2.0.2/leaflet.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -367,8 +358,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Neighborhood Segregation and Crime Variation</h1>
-<h3 class="subtitle">Subtitle here if desired</h3>
+<h1 class="title toc-ignore">Residential Segregation and Crime Variation</h1>
 <h4 class="author">Olivia Delos</h4>
 
 </div>
@@ -376,271 +366,108 @@ div.tocify {
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>My really awesome and complete introduction will go here.</p>
+<p>A large body of literature finds those living in racially segregated areas face higher disadvantage. Racially segregated areas are typically high poverty, with few employment opportunities, higher crime rates, and few social resources to foster upward mobilitiy, all factors that perpetuate crime (Logan and Oakley 2017). Policing is a common form of social control used in disadvantaged, racially segregated neighborhoods which lack the resources to form their own social control (Logan and Oakley 2017). Minorities are also arrested and convicted of crimes at higher rates due to unfair treatment at all stages of judicial processing. Studies find that violent crime is particularly common in disadvantaged neighborhoods (Friedson and Sharkey 2015). Taking this all into consideration, I predict that neighborhoods with higher levels of segregation will also have higher crime rates and the difference in crime between high and low segregated areas will be larger for violent crimes than property crimes, such as theft. I will measure segregation by calculating the dissimilarity index for census tracts in Buffalo, NY to determine if the number of crimes committed vary depending on residential segregation levels for both Black-white segregation and Hispanic-white segregation. To determine if rates differ depending on the crime type being examined, I will look at six crime types using PenData Buffalo: assault, breaking and entering, homicide, sexual offenses, robbery, and theft.</p>
 </div>
 <div id="materials-and-methods" class="section level1">
 <h1>Materials and methods</h1>
-<p>Narrative and most code will go here. Describe what you are doing and show how to do it (with code).</p>
-<p>You can do bullets like this:</p>
-<ul>
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
-</ul>
-<p>You can do numbers like this:</p>
 <ol style="list-style-type: decimal">
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
+<li>Load required packages</li>
+<li>Download crime data from buffalony.gov and 2017 ACS estimates for race data in Erie County</li>
+<li>Clean and join data</li>
+<li>Calculate segregation measures</li>
+<li>Run regression on types of crime and segregation</li>
+<li>Create figures</li>
 </ol>
-<p>See <a href="http://rmarkdown.rstudio.com/">http://rmarkdown.rstudio.com/</a> for all the amazing things you can do.</p>
-<p>Here’s my first code chunk.</p>
-<pre class="r"><code>1+2</code></pre>
-<pre><code>## [1] 3</code></pre>
-<p>Load any required packages in a code chunk (you may need to install some packages):</p>
-<pre class="r"><code>library(tidyverse)
-library(leaflet)
-library(kableExtra)
-library(rmarkdown)
-library(knitr)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling</code></pre>
-<div id="download-and-clean-all-required-data" class="section level2">
-<h2>Download and clean all required data</h2>
-<pre class="r"><code>n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))</code></pre>
-<pre class="r"><code>data %&gt;% 
-  slice(1:10) %&gt;% #show only 1:n rows
-  kable(digits=2,align=&quot;c&quot;)%&gt;% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;)) #apply other formatting</code></pre>
-<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:center;">
-x
-</th>
-<th style="text-align:center;">
-y
-</th>
-<th style="text-align:center;">
-size
-</th>
-<th style="text-align:center;">
-category
-</th>
-<th style="text-align:center;">
-value
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-115.06
-</td>
-<td style="text-align:center;">
--39.49
-</td>
-<td style="text-align:center;">
-10.99
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
-2.01
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-165.15
-</td>
-<td style="text-align:center;">
-15.38
-</td>
-<td style="text-align:center;">
-6.03
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
-0.99
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--125.57
-</td>
-<td style="text-align:center;">
-9.33
-</td>
-<td style="text-align:center;">
-12.41
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--0.02
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--64.41
-</td>
-<td style="text-align:center;">
-5.29
-</td>
-<td style="text-align:center;">
-11.26
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
-0.29
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--9.35
-</td>
-<td style="text-align:center;">
-30.62
-</td>
-<td style="text-align:center;">
-17.66
-</td>
-<td style="text-align:center;">
-b
-</td>
-<td style="text-align:center;">
--1.40
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-120.52
-</td>
-<td style="text-align:center;">
-34.63
-</td>
-<td style="text-align:center;">
-6.51
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
--0.34
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--126.33
-</td>
-<td style="text-align:center;">
-35.35
-</td>
-<td style="text-align:center;">
-14.01
-</td>
-<td style="text-align:center;">
-b
-</td>
-<td style="text-align:center;">
--1.12
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--146.16
-</td>
-<td style="text-align:center;">
--28.20
-</td>
-<td style="text-align:center;">
-14.54
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
--0.43
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--28.15
-</td>
-<td style="text-align:center;">
-3.15
-</td>
-<td style="text-align:center;">
-15.69
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--1.65
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
--153.61
-</td>
-<td style="text-align:center;">
-52.92
-</td>
-<td style="text-align:center;">
-19.18
-</td>
-<td style="text-align:center;">
-e
-</td>
-<td style="text-align:center;">
-1.02
-</td>
-</tr>
-</tbody>
-</table>
-<p>Add any additional processing steps here.</p>
+<div id="load-required-packages." class="section level2">
+<h2>1. Load required packages.</h2>
+<pre class="r"><code>library(tidycensus)
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(seg)
+library(sf)
+library(tigris)</code></pre>
+</div>
+<div id="download-the-data" class="section level2">
+<h2>2. Download the data</h2>
+<pre class="r"><code>#Load crime data
+crimesf=read_sf(&quot;https://data.buffalony.gov/api/geospatial/d6g9-xbgu?method=export&amp;format=GeoJSON&quot;)
+
+
+#Load census data
+v17 &lt;- load_variables(year = 2017, dataset = &quot;acs5&quot;, cache = TRUE)
+
+med_income2017 &lt;- get_acs(geography = &quot;tract&quot;,
+                        variables = &quot;B06011_001&quot;,
+                       state = &quot;NY&quot;,
+                       county = &quot;Erie&quot;,
+                       geometry = TRUE)</code></pre>
+<pre><code>## Getting data from the 2013-2017 5-year ACS</code></pre>
+<pre><code>## Downloading feature geometry from the Census website.  To cache shapefiles for use in future sessions, set `options(tigris_use_cache = TRUE)`.</code></pre>
+<pre class="r"><code>#Transform crime geometry to match census tract
+
+crimetrans &lt;- st_transform(crimesf, st_crs(med_income2017))
+
+inc_tracts &lt;- st_join(crimetrans, select(med_income2017,NAME), st_intersects)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersects assumes that they are planar</code></pre>
+</div>
+<div id="clean-crime-data" class="section level2">
+<h2>3. Clean crime data</h2>
+<pre class="r"><code>#extract year from date
+crime_date &lt;- ymd_hms(inc_tracts$incident_datetime) %&gt;%
+    year()
+  
+crime_year &lt;- cbind(crime_date, inc_tracts, stringsAsFactors = FALSE)
+
+#clean/filter crime data, drop geometry
+crime2017 &lt;- crime_year %&gt;%
+     filter(crime_date &gt;= 2013 &amp; crime_date &lt;= 2017) %&gt;%
+     group_by(NAME, parent_incident_type) %&gt;%
+    summarize(total = n()) %&gt;%
+    st_set_geometry(NULL)
+
+
+c2017_spread &lt;- spread(crime2017, parent_incident_type, total)
+
+c2017_spread[is.na(c2017_spread)] &lt;- 0</code></pre>
+</div>
+</div>
+<div id="clean-race-data-and-join-datasets" class="section level1">
+<h1>Clean race data and join datasets</h1>
+<pre class="r"><code>income_clean &lt;- med_income2017 %&gt;%
+  select(-moe, -variable)
+  
+crime_race &lt;- left_join(income_clean, c2017_spread, by = c(&quot;NAME&quot; = &quot;NAME&quot;))</code></pre>
+<div id="run-regression" class="section level2">
+<h2>4. Run regression</h2>
 </div>
 </div>
 <div id="results" class="section level1">
 <h1>Results</h1>
-<p>Show tables, plots, etc. and describe them.</p>
-<pre class="r"><code>m &lt;- leaflet(data) %&gt;% 
-  addTiles() %&gt;% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %&gt;% 
-  addPopups(~x[2], ~y[2], &quot;Random popup&quot;)
-m  # a map with the default OSM tile layer</code></pre>
+<p>This figure is a map of median income estimates by census tracts in Erie County, NY.</p>
+<pre class="r"><code>income_clean %&gt;% 
+  ggplot(aes(fill = estimate)) +
+  geom_sf()</code></pre>
 <div class="figure">
-<div id="htmlwidget-290e1184481c7d1a2034" style="width:576px;height:288px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-290e1184481c7d1a2034">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[-39.4873462803662,15.3829415235668,9.32612833566964,5.29414490796626,30.620487537235,34.6256341785192,35.3496596775949,-28.204813990742,3.15372163429856,52.9204231034964,-4.43287320435047,-50.5771038215607,44.6999929659069,-37.7067851833999,-32.6848771423101,24.053840925917,50.7696709502488,45.9868342895061,-26.2327046412975,59.4575086701661],[115.064375214279,165.146972034127,-125.5690239463,-64.4105454906821,-9.34931578114629,120.523486537859,-126.330409040675,-146.162973884493,-28.1546353083104,-153.611638052389,83.5561637487262,119.142183260992,151.751133659855,-66.1919481027871,138.845386086032,48.5146852210164,-33.0801177117974,13.7767095398158,172.491500778124,-41.4713761769235],[10.9880404372234,6.03455543634482,12.4062039260752,11.2630651670042,17.6633808412589,6.51309374952689,14.0088137611747,14.5396807882935,15.6918458302971,19.181343606906,15.137331886217,15.3202952153515,14.3082282121759,11.739141397411,12.7607700391673,16.8177771184128,6.07891716179438,11.7557465203572,16.664135750616,14.8108903411776],null,null,{"interactive":true,"className":"","stroke":true,"color":["a","a","c","c","b","a","b","a","c","e","e","d","d","d","b","d","d","c","e","e"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["a","a","c","c","b","a","b","a","c","e","e","d","d","d","b","d","d","c","e","e"],"fillOpacity":0.2},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPopups","args":[15.3829415235668,165.146972034127,"Random popup",null,null,{"maxWidth":300,"minWidth":50,"autoPan":true,"keepInView":false,"closeButton":true,"className":""}]}],"limits":{"lat":[-50.5771038215607,59.4575086701661],"lng":[-153.611638052389,172.491500778124]}},"evals":[],"jsHooks":[]}</script>
+<img src="index_files/figure-html/unnamed-chunk-6-1.png" alt="Map of median income by census tract" width="576" />
 <p class="caption">
-Map of completely random data
+Map of median income by census tract
 </p>
 </div>
-<pre class="r"><code>data %&gt;% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>This figure is a map of crime by type in 2017</p>
+<pre class="r"><code># ggplot(crime2017, aes(x = crime_date, y = total)) + geom_line(aes(color = parent_incident_type))
+
+# ggplot(crime2017, aes(color = total)) + geom_sf()</code></pre>
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
-<p>What have you learned? Are there any broader implications?</p>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
+<p>Friedson, Michael and Patrick Sharkey. 2015. “Violence and Neighborhood Disadvantage after the Crime Decline.” <em>The American Academy of Political &amp; Social Science</em> 660.</p>
+<p>Logan, John, and Deirdre Oakley. 2017. “Black Lives and Policing: The Larger Context of Ghettoization.” <em>Journal of Urban Affairs</em> 39:1031-1046.</p>
 </div>
 
 <!-- give the footer some space -->

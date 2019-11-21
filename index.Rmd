@@ -5,7 +5,7 @@ author: Olivia Delos
 ---
 
 # Introduction
-A large body of literature finds those living in racially segregated areas face higher disadvantage. Racially segregated areas are typically high poverty, with few employment opportunities, higher crime rates, and few social resources to foster upward mobilitiy, all factors that perpetuate crime (Logan and Oakley 2017). Policing is a common form of social control used in disadvantaged, racially segregated neighborhoods which lack the resources to form their own social control (Logan and Oakley 2017). Minorities are also arrested and convicted of crimes at higher rates due to unfair treatment at all stages of judicial processing. Studies find that violent crime is particularly common in disadvantaged neighborhoods (Friedson and Sharkey 2015). Taking this all into consideration, I predict that neighborhoods with higher levels of segregation will also have higher crime rates and the difference in crime between high and low segregated areas will be larger for violent crimes than property crimes, such as theft. I will measure segregation by calculating the dissimilarity index for census tracts in Buffalo, NY to determine if the number of crimes committed vary depending on residential segregation levels for both Black-white segregation and Hispanic-white segregation. To determine if rates differ depending on the crime type being examined, I will look at six crime types using PenData Buffalo: assault, breaking and entering, homicide, sexual offenses, robbery, and theft.
+Crime rates have decreased for all types of crime since the 1990s, although most considerably for violent crimes (Papachristos 2013). However, crime rates vary depending on the social composition of a neighborhood. Disadvantaged neighborhoods are disproportionately low-income with weak social ties and high residential instability (Zuberi 2012). The concentration of poverty, violence, and high policing in disadvantaged neighborhoods hinder residents’ ability to form social cohesion and community organization, increasing residents’ risk of victimization and limiting social control (Van Wilsem, Wittebrood, De Graaf 2006). Disadvantaged neighborhoods are also often policed at higher rates than their counterparts. The high poverty and policing combined with lack of social control and low social cohesion in disadvantaged neighborhoods leads to increased crime rates in these areas (Van Wilsem et al. 2006). Violent crime, in particular, is more prevalent in urban, disadvantaged neighborhoods (Friedson and Sharkey 2015). However, few studies have examined whether the type of crimes committed in disadvantaged neighborhoods are different from those committed in less disadvantaged areas. By examining census data and crime data from Buffalo, New York I want to answer three questions: 1) Are the types of crime being committed in low-income census tracts different from those in higher income tracts? 2) Have census tracts witnessed an overall decrease in crime between 1990 and 2018? 3) If so, does the decrease differ by crime type? To answer my questions, I will compare crime rates by type of crime incident in the 1990s to crime rates in 2018. I measure neighborhood disadvantage using census tract data in Buffalo, New York on median income from the 1990 census and 2018 ACS. Crime data comes from the public PenData Buffalo and can be broken into six categories: assault, breaking and entering, homicide, sexual offenses, robbery, and theft. I predict that, although crime rates for all types are likely higher in lower income neighborhoods, violent crimes will be more common, while theft and other offenses are more likely to occur than violent crimes in higher income neighborhoods and that crimes rates have likely decreased in all tracts, but more so for violent crimes, as opposed to property crimes.
 
 
 # Materials and methods
@@ -66,7 +66,7 @@ crime_year <- cbind(crime_date, inc_tracts, stringsAsFactors = FALSE)
 #clean/filter crime data, drop geometry
 crime2017 <- crime_year %>%
      filter(crime_date >= 2013 & crime_date <= 2017) %>%
-     group_by(NAME, parent_incident_type) %>%
+     group_by(NAME, crime_date, parent_incident_type) %>%
     summarize(total = n()) %>%
     st_set_geometry(NULL)
 
@@ -81,7 +81,7 @@ c2017_spread[is.na(c2017_spread)] <- 0
 income_clean <- med_income2017 %>%
   select(-moe, -variable)
   
-crime_race <- left_join(income_clean, c2017_spread, by = c("NAME" = "NAME"))
+crime_income <- left_join(income_clean, c2017_spread, by = c("NAME" = "NAME"))
   
 ```
 
@@ -99,8 +99,8 @@ crime_race <- left_join(income_clean, c2017_spread, by = c("NAME" = "NAME"))
 This figure is a map of median income estimates by census tracts in Erie County, NY. 
 
 ```{r, fig.width=6, fig.height=3, fig.cap="Map of median income by census tract"}
-income_clean %>% 
-  ggplot(aes(fill = estimate)) +
+p1 <- crime_income %>% 
+  ggplot(aes(fill = estimate)) + 
   geom_sf()
 
 ```
@@ -108,6 +108,10 @@ income_clean %>%
 This figure is a map of crime by type in 2017
 
 ```{r}
+p1 + geom_point(crime_income, aes(x = crime_date, y = Assault))
+
+ggplot(crime_income, aes(x = crime_date, y = Assault)) + geom_point()
+
 # ggplot(crime2017, aes(x = crime_date, y = total)) + geom_line(aes(color = parent_incident_type))
 
 # ggplot(crime2017, aes(color = total)) + geom_sf()
