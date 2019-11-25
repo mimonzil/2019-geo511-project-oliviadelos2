@@ -116,7 +116,7 @@ crime_income2010 <- left_join(income_clean10, c2010_spread, by = c("NAME" = "NAM
 
 ## 4. Run regression
 ```{r, results='asis', cache = TRUE}
-regress <- lm(estimate~Assault+Homicide+Robbery, data = crime_income2010)
+regress <- lm(estimate~Assault+Homicide+Robbery, data = crime_income2010)  
 summary(regress)
 ```
 
@@ -127,8 +127,8 @@ summary(regress)
 This figure is a map of median income estimates by census tracts in Erie County, NY. 
 
 ```{r, fig.width=6, fig.height=3, fig.cap="Map of median income by census tract"}
-p1 <- crime_income %>% 
-  ggplot(aes(fill = estimate)) + 
+p1 <- crime_income %>%   
+  ggplot(aes(fill = estimate)) +  
   geom_sf()
 
 ```
@@ -136,13 +136,13 @@ p1 <- crime_income %>%
 This figure is a map of crime by type in 2017
 
 ```{r}
-p1 + geom_point(crime_income, aes(x = crime_date, y = Assault))
+p1 + geom_point(crime_income, aes(x = crime_date, y = Assault)) 
 
-ggplot(crime_income, aes(x = crime_date, y = Assault)) + geom_point()
+ggplot(crime_income, aes(x = crime_date, y = Assault)) + geom_point()  
 
-# ggplot(crime2017, aes(x = crime_date, y = total)) + geom_line(aes(color = parent_incident_type))
+# ggplot(crime2017, aes(x = crime_date, y = total)) + geom_line(aes(color = parent_incident_type))  
 
-# ggplot(crime2017, aes(color = total)) + geom_sf()
+# ggplot(crime2017, aes(color = total)) + geom_sf() 
 ```
 # Conclusions
 
